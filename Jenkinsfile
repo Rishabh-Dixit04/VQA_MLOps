@@ -17,15 +17,34 @@ pipeline {
         }
 
         // Stage 2: CI Test (Requirement: "Running automated tests" [cite: 18])
+        // stage('CI: LoRA Simulation') {
+        //     steps {
+        //         echo "Starting LoRA Finetuning Simulation..."
+        //         sh 'pip install -r requirements.txt' 
+        //         sh 'python3 src/train_mini.py'
+        //     }
+        //     post {
+        //         always {
+        //             // Archives the loss graph for visual proof
+        //             archiveArtifacts artifacts: '*.png', allowEmptyArchive: true
+        //         }
+        //     }
+        // }
+
         stage('CI: LoRA Simulation') {
             steps {
                 echo "Starting LoRA Finetuning Simulation..."
+                
+                // --- FIX: Force CPU-only Torch installation first ---
+                sh 'pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu'
+                
+                // Now install the rest (transformers will see torch is already there and skip it)
                 sh 'pip install -r requirements.txt' 
+                
                 sh 'python3 src/train_mini.py'
             }
             post {
                 always {
-                    // Archives the loss graph for visual proof
                     archiveArtifacts artifacts: '*.png', allowEmptyArchive: true
                 }
             }
