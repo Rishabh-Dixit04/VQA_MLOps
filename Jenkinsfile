@@ -1,11 +1,25 @@
 pipeline {
     agent any
 
+    // environment {
+    //     // --- CONFIGURATION: Update these values ---
+    //     DOCKER_HUB_USER = 'rishabh720'  // <--- REPLACE WITH YOUR ACTUAL USERNAME
+    //     IMAGE_NAME      = 'vqa-project'
+    //     IMAGE_TAG       = "v3-${BUILD_NUMBER}"       // Use a unique tag for every build
+    // }
+
     environment {
-        // --- CONFIGURATION: Update these values ---
-        DOCKER_HUB_USER = 'rishabh720'  // <--- REPLACE WITH YOUR ACTUAL USERNAME
+        // --- CONFIGURATION ---
+        DOCKER_HUB_USER = 'rishabh720'
         IMAGE_NAME      = 'vqa-project'
-        IMAGE_TAG       = "v3-${BUILD_NUMBER}"       // Use a unique tag for every build
+        IMAGE_TAG       = "v3-${BUILD_NUMBER}"
+        
+        // --- NEW: POINT JENKINS TO YOUR LOCAL CLUSTER ---
+        // This tells Minikube where to find the cluster state
+        MINIKUBE_HOME = '/home/rishabh/.minikube'
+        
+        // This tells Ansible/Kubectl where to find connection details
+        KUBECONFIG    = '/home/rishabh/.kube/config'
     }
 
     stages {
