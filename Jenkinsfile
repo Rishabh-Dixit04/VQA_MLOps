@@ -76,12 +76,25 @@ pipeline {
         }
 
         // Stage 4: Model Evaluation (Quality Gate)
+        // stage('CI: Model Evaluation') {
+        //     steps {
+        //         script {
+        //             echo "Validating Model Logic inside Container..."
+        //             // Runs the evaluation script inside the container environment
+        //             customImage.inside {
+        //                 sh 'python3 src/evaluate_model.py'
+        //             }
+        //         }
+        //     }
+        // }
+        // Stage 4: Model Evaluation (Quality Gate)
         stage('CI: Model Evaluation') {
             steps {
                 script {
                     echo "Validating Model Logic inside Container..."
-                    // Runs the evaluation script inside the container environment
-                    customImage.inside {
+                    
+                    // FIX: Use 'appImage' instead of 'customImage'
+                    appImage.inside {
                         sh 'python3 src/evaluate_model.py'
                     }
                 }
@@ -102,15 +115,33 @@ pipeline {
         //     }
         // }
 
+        // stage('CD: Push to Registry') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('', 'docker-hub-credentials') {
+        //                 // Push App
+        //                 appImage.push()
+        //                 appImage.push('latest')
+                        
+        //                 // Push Model (Stores weights in registry)
+        //                 modelImage.push()
+        //                 modelImage.push('latest')
+        //             }
+        //         }
+        //     }
+        // }
+
+        // Stage 5: Push to Registry
         stage('CD: Push to Registry') {
             steps {
                 script {
+                    echo "Pushing Images to Docker Hub..."
                     docker.withRegistry('', 'docker-hub-credentials') {
                         // Push App
                         appImage.push()
                         appImage.push('latest')
                         
-                        // Push Model (Stores weights in registry)
+                        // Push Model
                         modelImage.push()
                         modelImage.push('latest')
                     }
