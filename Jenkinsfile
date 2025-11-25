@@ -154,7 +154,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Images to Docker Hub..."
-                    docker.withRegistry('', 'docker-hub-credentials') {
+                    docker.withRegistry('', 'docker-hub-credentials-id') {
                         // Push App
                         appImage.push()
                         appImage.push('latest')
