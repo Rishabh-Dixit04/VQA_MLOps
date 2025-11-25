@@ -132,6 +132,7 @@ pipeline {
         // }
 
         // Stage 5: Push to Registry
+        
         stage('CD: Push to Registry') {
             steps {
                 script {
