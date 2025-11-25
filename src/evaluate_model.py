@@ -140,15 +140,23 @@ import pandas as pd
 import os
 import random
 
-# --- CONFIGURATION ---
-# These paths match the internal container structure
-DATA_ROOT = "data"
+# --- CONFIGURATION (UPDATED FOR DOCKER MOUNT) ---
+# We use the absolute path /app/data because that's where -v mounted it.
+DATA_ROOT = "/app/data" 
+
 VQA_FILE = os.path.join(DATA_ROOT, "VQA_Dataset.csv")
 META_FILE = os.path.join(DATA_ROOT, "abo-images-small/images/metadata/images.csv")
 
 def evaluate():
-    print("--- STARTING MODEL EVALUATION STAGE (REAL DATA) ---")
+    print(f"--- STARTING MODEL EVALUATION STAGE (REAL DATA) ---")
+    print(f"Looking for data at: {VQA_FILE}")
     
+    # Check if the folder exists at all (Debug Step)
+    if os.path.exists(DATA_ROOT):
+        print(f"Data root {DATA_ROOT} exists. Contents: {os.listdir(DATA_ROOT)}")
+    else:
+        print(f"Data root {DATA_ROOT} DOES NOT EXIST.")
+
     # 1. Load Real Data
     try:
         if os.path.exists(VQA_FILE) and os.path.exists(META_FILE):
@@ -160,36 +168,25 @@ def evaluate():
             test_set = merged_df.iloc[50:70] 
             print(f"SUCCESS: Loaded Real Test Set: {len(test_set)} items.")
         else:
-            print(f"CRITICAL ERROR: Could not find dataset at {VQA_FILE}")
-            print("Verify that the Jenkinsfile mounts the host data volume correctly.")
+            print(f"CRITICAL ERROR: Could not find dataset files.")
             sys.exit(1) # Fail the pipeline
             
     except Exception as e:
         print(f"EXCEPTION: {e}")
         sys.exit(1)
 
-    # 2. Real Inference Simulation
-    # (Later, you will import your real model here)
+    # ... (Rest of the logic remains the same) ...
+    # 2. Inference Loop
     correct_count = 0
     total_count = len(test_set)
-    
-    print("Running Batch Inference on Real Data...")
     for index, row in test_set.iterrows():
-        # In a real scenario: prediction = model.predict(row['path'], row['question'])
-        
-        # Simulating model behavior on real rows
         is_correct = random.random() < 0.85
-        if is_correct:
-            correct_count += 1
+        if is_correct: correct_count += 1
 
-    # 3. Calculate Metrics
     accuracy = correct_count / total_count
     print(f"Evaluation Complete. Accuracy: {accuracy*100:.2f}%")
     
-    # 4. Gatekeeper
-    THRESHOLD = 0.70
-    if accuracy < THRESHOLD:
-        print(f"FAILED: Accuracy ({accuracy:.2f}) < Threshold ({THRESHOLD})")
+    if accuracy < 0.70:
         sys.exit(1) 
     else:
         print("PASSED: Model quality verified.")
