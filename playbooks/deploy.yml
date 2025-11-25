@@ -1,0 +1,11 @@
+---
+- name: Deploy VQA Agent to Kubernetes
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Apply Kubernetes Manifests
+      kubernetes.core.k8s:
+        state: present
+        # This points to the file in the project root (one level up)
+        src: "{{ playbook_dir }}/../deployment.yaml"

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vqa-agent
+  namespace: default   # <--- ADD THIS LINE
+  labels:
+    app: vqa-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vqa-agent
+  template:
+    metadata:
+      labels:
+        app: vqa-agent
+    spec:
+      containers:
+      - name: vqa-container
+        # Ensure this matches your pushed image
+        image: rishabh720/vqa-project:v2 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+        volumeMounts:
+        - mountPath: /app/data/abo-images-small
+          name: data-volume
+      volumes:
+      - name: data-volume
+        hostPath:
+          path: /data/abo-images-small
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vqa-service
+  namespace: default   # <--- ADD THIS LINE
+spec:
+  type: LoadBalancer
+  selector:
+    app: vqa-agent
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000

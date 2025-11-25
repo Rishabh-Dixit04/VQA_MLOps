@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+venv
+vqa_ops
+.DS_Store
+data/abo-images-small

@@ -1,0 +1,7 @@
+flask
+transformers
+peft
+pandas
+matplotlib
+scikit-learn
+requests
