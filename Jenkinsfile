@@ -88,13 +88,30 @@ pipeline {
         //     }
         // }
         // Stage 4: Model Evaluation (Quality Gate)
+        // stage('CI: Model Evaluation') {
+        //     steps {
+        //         script {
+        //             echo "Validating Model Logic inside Container..."
+                    
+        //             // FIX: Use 'appImage' instead of 'customImage'
+        //             appImage.inside {
+        //                 sh 'python3 src/evaluate_model.py'
+        //             }
+        //         }
+        //     }
+        // }
+
         stage('CI: Model Evaluation') {
             steps {
                 script {
                     echo "Validating Model Logic inside Container..."
                     
-                    // FIX: Use 'appImage' instead of 'customImage'
-                    appImage.inside {
+                    // --- THE FIX IS HERE ---
+                    // We explicitly mount the host folder (/home/rishabh/...) 
+                    // into the container folder (/app/data)
+                    def dataPath = "/home/rishabh/Final Project/data"
+                    
+                    appImage.inside("-v \"${dataPath}\":/app/data") {
                         sh 'python3 src/evaluate_model.py'
                     }
                 }
@@ -132,7 +149,7 @@ pipeline {
         // }
 
         // Stage 5: Push to Registry
-        
+
         stage('CD: Push to Registry') {
             steps {
                 script {
