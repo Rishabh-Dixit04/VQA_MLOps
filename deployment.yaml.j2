@@ -31,12 +31,12 @@ spec:
             cpu: "500m"
             memory: "1.5Gi"
         volumeMounts:
-        - mountPath: /app/data/abo-images-small
+        - mountPath: /app/data
           name: data-volume
       volumes:
       - name: data-volume
         hostPath:
-          path: /data/abo-images-small
+          path: /data
 ---
 apiVersion: v1
 kind: Service
