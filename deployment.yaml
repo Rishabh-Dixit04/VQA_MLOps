@@ -24,11 +24,11 @@ spec:
         - containerPort: 5000
         resources:
           limits:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "1000m"
+            memory: "2.5Gi"
           requests:
-            cpu: "250m"
-            memory: "256Mi"
+            cpu: "500m"
+            memory: "1.5Gi"
         volumeMounts:
         - mountPath: /app/data/abo-images-small
           name: data-volume
