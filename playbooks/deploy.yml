@@ -28,3 +28,10 @@
       kubernetes.core.k8s:
         state: present
         src: /tmp/deployment-{{ image_tag }}.yaml
+    
+    # --- NEW TASK ---
+    - name: Apply ELK Monitoring Stack
+      kubernetes.core.k8s:
+        state: present
+        # Points to the file you just created
+        src: "{{ playbook_dir }}/../monitoring.yaml"
