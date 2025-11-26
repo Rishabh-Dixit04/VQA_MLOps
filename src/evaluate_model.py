@@ -218,6 +218,9 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForQuestionAnswering
 from peft import PeftModel
 
+from huggingface_hub import login
+login(token=os.environ.get("HF_TOKEN"))
+
 # --- CONFIGURATION ---
 # 1. Data Paths (Mounted from Host)
 DATA_ROOT = "/app/data"
