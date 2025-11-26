@@ -1,3 +1,9 @@
 trying push
 hello again
 test
+curl -X POST http://127.0.0.1:33967/predict \
+     -H "Content-Type: application/json" \
+     -d '{
+           "image_path": "14/14db355d.jpg", 
+           "question": "what is this item?"
+         }'

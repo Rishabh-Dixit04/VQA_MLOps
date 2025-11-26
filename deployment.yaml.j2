@@ -18,7 +18,8 @@ spec:
       containers:
       - name: vqa-container
         # Ensure this matches your pushed image
-        image: rishabh720/vqa-project:v2 
+        # image: rishabh720/vqa-project:v2 
+        image: {{ docker_user }}/vqa-app:{{ image_tag }} 
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

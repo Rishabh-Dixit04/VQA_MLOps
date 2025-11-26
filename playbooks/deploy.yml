@@ -1,11 +1,30 @@
+# ---
+# - name: Deploy VQA Agent to Kubernetes
+#   hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   tasks:
+#     - name: Apply Kubernetes Manifests
+#       kubernetes.core.k8s:
+#         state: present
+#         # This points to the file in the project root (one level up)
+#         src: "{{ playbook_dir }}/../deployment.yaml"
+
 ---
 - name: Deploy VQA Agent to Kubernetes
   hosts: localhost
   connection: local
   gather_facts: no
   tasks:
+    # 1. RENDER TEMPLATE: Create the final deployment.yaml file
+    - name: Render Deployment Manifest Template
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../deployment.yaml.j2"
+        dest: /tmp/deployment-{{ image_tag }}.yaml
+        # The variables (image_tag, docker_user) are passed by Jenkins
+
+    # 2. APPLY MANIFEST: Apply the rendered file
     - name: Apply Kubernetes Manifests
       kubernetes.core.k8s:
         state: present
-        # This points to the file in the project root (one level up)
-        src: "{{ playbook_dir }}/../deployment.yaml"
+        src: /tmp/deployment-{{ image_tag }}.yaml
