@@ -266,7 +266,7 @@ pipeline {
 
                     def dataPath = "/home/rishabh/Final Project/data"
 
-                    withCredentials([string(credentialsId: 'huggingface-token', variable: 'HF_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'HF_TOKEN', variable: 'HF_TOKEN')]) {
 
                         appImage.inside("-v \"${dataPath}\":/app/data") {
 
