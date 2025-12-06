@@ -1,0 +1,29 @@
+{
+  "order": 1,
+  "index_patterns": ["filebeat-*"],
+  "settings": {
+    "index.mapping.total_fields.limit": 2000
+  },
+  "mappings": {
+    "properties": {
+      "latency_seconds": {
+        "type": "float"
+      },
+      "quality_score": {
+        "type": "float"
+      },
+      "kubernetes": {
+        "type": "object",
+        "properties": {
+          "container": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
