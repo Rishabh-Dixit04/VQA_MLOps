@@ -1,2 +1,2 @@
 sample text
-new text
+new text1
