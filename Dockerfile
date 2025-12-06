@@ -1,6 +1,9 @@
 # Use a lightweight Python base image
 FROM python:3.9-slim
 
+# --- NEW LINE: Force unbuffered output (Logs appear instantly) ---
+ENV PYTHONUNBUFFERED=1
+
 # Set the working directory inside the container
 WORKDIR /app
 
