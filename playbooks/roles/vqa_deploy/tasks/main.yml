@@ -1,0 +1,17 @@
+---
+- name: Render Deployment Manifest Template
+  ansible.builtin.template:
+    # Ansible automatically looks in the 'templates' folder of the role
+    src: deployment.yaml.j2 
+    dest: /tmp/deployment-{{ image_tag }}.yaml
+
+- name: Apply Kubernetes Manifests (App)
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/deployment-{{ image_tag }}.yaml
+
+- name: Apply ELK Monitoring Stack
+  kubernetes.core.k8s:
+    state: present
+    # We assume monitoring.yaml is still in the root or a common location
+    src: "{{ playbook_dir }}/../monitoring.yaml"

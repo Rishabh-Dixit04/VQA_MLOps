@@ -1,25 +1,33 @@
+# ---
+# - name: Deploy VQA Agent to Kubernetes
+#   hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   tasks:
+#     # 1. RENDER TEMPLATE: Create the final deployment.yaml file
+#     - name: Render Deployment Manifest Template
+#       ansible.builtin.template:
+#         src: "{{ playbook_dir }}/../deployment.yaml.j2"
+#         dest: /tmp/deployment-{{ image_tag }}.yaml
+#         # The variables (image_tag, docker_user) are passed by Jenkins
+
+#     # 2. APPLY MANIFEST: Apply the rendered file
+#     - name: Apply Kubernetes Manifests
+#       kubernetes.core.k8s:
+#         state: present
+#         src: /tmp/deployment-{{ image_tag }}.yaml
+    
+#     # --- NEW TASK ---
+#     - name: Apply ELK Monitoring Stack
+#       kubernetes.core.k8s:
+#         state: present
+#         # Points to the file you just created
+#         src: "{{ playbook_dir }}/../monitoring.yaml"
+
 ---
-- name: Deploy VQA Agent to Kubernetes
+- name: Deploy VQA Agent with Roles
   hosts: localhost
   connection: local
   gather_facts: no
-  tasks:
-    # 1. RENDER TEMPLATE: Create the final deployment.yaml file
-    - name: Render Deployment Manifest Template
-      ansible.builtin.template:
-        src: "{{ playbook_dir }}/../deployment.yaml.j2"
-        dest: /tmp/deployment-{{ image_tag }}.yaml
-        # The variables (image_tag, docker_user) are passed by Jenkins
-
-    # 2. APPLY MANIFEST: Apply the rendered file
-    - name: Apply Kubernetes Manifests
-      kubernetes.core.k8s:
-        state: present
-        src: /tmp/deployment-{{ image_tag }}.yaml
-    
-    # --- NEW TASK ---
-    - name: Apply ELK Monitoring Stack
-      kubernetes.core.k8s:
-        state: present
-        # Points to the file you just created
-        src: "{{ playbook_dir }}/../monitoring.yaml"
+  roles:
+    - vqa_deploy

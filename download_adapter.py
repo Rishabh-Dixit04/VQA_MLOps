@@ -20,4 +20,4 @@ model = PeftModel.from_pretrained(base_model, ADAPTER_ID)
 print(f"3. Saving Adapter to {SAVE_PATH}...")
 model.save_pretrained(SAVE_PATH)
 
-print("✅ Success! Adapter weights are now local.")
+print("Success! Adapter weights are now local.")
