@@ -1,11 +1,14 @@
 ## 1. Project Description
 This project implements a complete **MLOps (Machine Learning Operations) pipeline** for deploying a **Visual Question Answering (VQA) Agent**. The system automates the lifecycle of the ML model from code commit to production deployment using industry-standard DevOps tools.
 
+[project_demo](https://www.youtube.com/watch?v=8YAyv_SrWIE)
+
 **Key capabilities include:**
 * **Hybrid Model Architecture:** Utilizes a lightweight text model (`bert-tiny`) for rapid CI simulation and a heavy VQA model (`blip-vqa-capfilt-large`) for production inference.
 * **Efficient Artifact Management:** Implements "Model-as-Image" patterns and LoRA adapter integration to handle large weights efficiently.
 * **Infrastructure-as-Code:** Uses Ansible for templated, dynamic Kubernetes deployments.
-* **Observability:** Full integration with the ELK Stack (Elasticsearch, Logstash, Kibana) for log monitoring.
+* **Observability & Metrics:** Full integration with the ELK Stack to track Latency and Model Confidence Scores.
+* **Self-Healing Feedback Loop:** An automated watchdog service that triggers retraining pipelines if model quality drops below a threshold.
 * **Scalability:** Horizontal Pod Autoscaling (HPA) to handle traffic bursts.
 
 ---
@@ -19,8 +22,9 @@ This project implements a complete **MLOps (Machine Learning Operations) pipelin
 | **Containerization** | **Docker** | Builds optimized, layered images for the application and model artifacts. |
 | **Configuration** | **Ansible** | Manages Kubernetes manifests via Jinja2 templating. |
 | **Orchestration** | **Minikube (K8s)** | Local Kubernetes cluster for deployment. |
-| **Monitoring** | **ELK Stack** | Visualizes application logs (`LOG_EVENT`) in Kibana. |
+| **Monitoring** | **ELK Stack** | Visualizes logs and tracks `quality_score` & `latency` metrics. |
 | **Model** | **HuggingFace** | Hosts the Base Model and Fine-Tuned LoRA Adapters. |
+| **Automation**| **Python Watchdog** | Closes the MLOps loop by triggering Jenkins based on live metrics. |
 
 ---
 
@@ -89,6 +93,12 @@ Exposes the Monitoring Dashboard to localhost:5601.
 
 kubectl port-forward -n logging svc/kibana 5601:5601 --address 0.0.0.0
 ```
+### 4. Elasticsearch Tunnel (For Watchdog Script)
+Exposes the ES API for the feedback loop script.
+```Bash
+
+kubectl port-forward -n logging svc/elasticsearch 9200:9200 --address 0.0.0.0
+```
 
 ## 5. The CI/CD Pipeline Workflow
 
@@ -102,11 +112,28 @@ The Jenkinsfile defines a 6-stage pipeline triggered automatically by a Git Push
 - CI: Model Evaluation: Runs evaluate_model.py inside a container. It loads the Real Model from the mounted disk and tests inference on a subset of real data.
 - CD: Push to Registry: Pushes tagged images to Docker Hub (rishabh720/vqa-app).
 - CD: Deploy to Kubernetes:
-  - Loads images directly into Minikube (bypassing internet).
-  - Uses Ansible to render deployment.yaml.j2 with the new tag.
+  - Loads images directly into Minikube (bypassing internet/bandwidth issues).
+  - Uses Ansible Roles (playbooks/roles/vqa_deploy) to render deployment.yaml.j2 with the new tag.
   - Applies the deployment + HPA + ELK Stack.
 
-## 6. How to Test & Demo
+## 6. Advanced Features & Innovation
+### A. Modular Ansible Roles
+- Instead of a monolithic playbook, we use a modular design:
+- Role: playbooks/roles/vqa_deploy
+- Function: Separates template rendering and manifest application logic, ensuring scalability and maintainability.
+
+### B. Quality & Performance Metrics
+- The application calculates and logs specific metrics for every inference request:
+- quality_score: The model's confidence probability (Softmax) in its generated answer.
+- latency_seconds: The exact time taken to process the image and generate text.
+
+### C. Automated Feedback Loop (Self-Healing)
+- A watchdog script (monitor_feedback_loop.py) runs alongside the cluster.
+- It queries Elasticsearch for recent quality_score metrics.
+- If the average score drops below a threshold (e.g., 0.75).
+- It automatically triggers the Jenkins Pipeline via API to retrain/redeploy the model.
+
+## 7. How to Test & Demo
 ### A. Trigger the Pipeline
 
 - Make a change to the code.
@@ -129,20 +156,27 @@ curl -X POST http://localhost:5000/predict \
 Expected Output:
 ```JSON
 
-{"answer": "a remote control", "question": "what is this item?"}
+{
+  "answer": "sneakers",
+  "event": "inference",
+  "latency_seconds": 90.5573,
+  "quality_score": 0.6514,
+  "question": "what is this item?"
+}
 ```
 
 ### C. Verify Monitoring
 - Open Browser: http://localhost:5601.
 - Go to Discover.
 - Search for: "LOG_EVENT".
-- Evidence: You will see the timestamped logs of the question you just asked.
+- Evidence: You will see the structured JSON logs containing the quality_score and latency.
 
-### D. Verify Scaling (HPA)
-
+### D. Verify Feedback Loop
+Run the watchdog script manually to simulate the automated check:
 ```Bash
 
-kubectl get hpa
+python3 monitor_feedback_loop.py
 ```
 
-Shows the target CPU utilization (e.g., 0%/50%) and the replica count.
+- Output: It will detect the score (0.65) is below threshold (0.75) and print: 🚀 TRIGGERING RETRAINING PIPELINE....
+- Result: A new build will appear in Jenkins.
