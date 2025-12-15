@@ -65,22 +65,16 @@ def predict():
         # We take the probabilities of the generated tokens
         confidence_score = 0.0
         if outputs.scores:
-            # Stack scores from all generation steps
             scores = torch.stack(outputs.scores, dim=1)
-            # Apply softmax to get probabilities
             probs = torch.nn.functional.softmax(scores, dim=-1)
-            # Get the probability of the actual chosen tokens
-            token_ids = outputs.sequences[:, 1:] # Skip start token
-            # Gather the probabilities of the selected tokens
+            token_ids = outputs.sequences[:, 1:] 
             token_probs = torch.gather(probs, 2, token_ids.unsqueeze(-1)).squeeze(-1)
-            # Average probability represents the model's overall confidence
             confidence_score = torch.mean(token_probs).item()
 
         # Calculate Latency
         latency = time.time() - start_time
         
         # --- STRUCTURED LOGGING FOR ELK ---
-        # This JSON structure is easy for Kibana to parse
         log_payload = {
             "event": "inference",
             "question": question,
