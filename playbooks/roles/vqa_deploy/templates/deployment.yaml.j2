@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vqa-agent
-  namespace: default   # <--- ADD THIS LINE
+  namespace: default  
   labels:
     app: vqa-agent
 spec:
@@ -42,7 +42,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vqa-service
-  namespace: default   # <--- ADD THIS LINE
+  namespace: default   
 spec:
   type: LoadBalancer
   selector:

@@ -72,7 +72,7 @@ def trigger_jenkins():
         if crumb_resp.status_code == 200:
             crumb_data = crumb_resp.json()
             headers[crumb_data['crumbRequestField']] = crumb_data['crumb']
-            print("   -> CSRF Crumb obtained.")
+            # print("   -> CSRF Crumb obtained.")
         else:
             print("   -> Warning: Could not get CSRF crumb (might be disabled).")
 
